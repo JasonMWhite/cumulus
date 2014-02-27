@@ -21,7 +21,7 @@ task :update_weather => :environment do
 
     (Date.new(last_date.year, last_date.month, 1)..Date.today).select {|d| d.day == 1}.each do |date|
       start_time = Time.now
-      response = conn.get('/climateData/bulkdata_e.html', {format: 'xml', stationID: station.ec_identifier, 'Year' => date.year, 'Month' => date.month, 'Day' => date.day, timeframe: 1, submit: 'Download Data'})
+      response = conn.get('/climateData/bulkdata_e.html', {format: 'xml', stationID: station.national_station_id, 'Year' => date.year, 'Month' => date.month, 'Day' => date.day, timeframe: 1, submit: 'Download Data'})
       logger.info "[Benchmarking] Data retrieved in #{Time.now - start_time} seconds"
       start_time = Time.now
 

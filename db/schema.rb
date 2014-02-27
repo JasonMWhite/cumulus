@@ -11,27 +11,31 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140227192648) do
+ActiveRecord::Schema.define(version: 20140227221626) do
 
   create_table "measurements", force: true do |t|
-    t.date     "date"
-    t.integer  "hour"
-    t.decimal  "temperature",    precision: 5, scale: 2
-    t.decimal  "dew_point",      precision: 5, scale: 2
+    t.date     "date_lst"
+    t.integer  "hour_lst"
+    t.decimal  "temperature",     precision: 5, scale: 2
+    t.decimal  "dew_point",       precision: 5, scale: 2
     t.integer  "humidity"
     t.integer  "wind_direction"
     t.integer  "wind_speed"
-    t.decimal  "visibility",     precision: 5, scale: 2
-    t.decimal  "air_pressure",   precision: 5, scale: 2
-    t.decimal  "humidex",        precision: 5, scale: 2
-    t.decimal  "wind_chill",     precision: 5, scale: 2
+    t.decimal  "visibility",      precision: 5, scale: 2
+    t.decimal  "air_pressure",    precision: 5, scale: 2
+    t.decimal  "humidex",         precision: 5, scale: 2
+    t.decimal  "wind_chill",      precision: 5, scale: 2
     t.string   "weather"
     t.integer  "station_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.date     "date_utc"
+    t.integer  "hour_utc"
+    t.integer  "precipitation"
+    t.integer  "solar_radiation"
   end
 
-  add_index "measurements", ["station_id", "date", "hour"], name: "index_measurements_on_station_id_and_date_and_hour", unique: true, using: :btree
+  add_index "measurements", ["station_id", "date_lst"], name: "index_measurements_on_station_id_and_date_lst", using: :btree
   add_index "measurements", ["station_id"], name: "index_measurements_on_station_id", using: :btree
 
   create_table "stations", force: true do |t|

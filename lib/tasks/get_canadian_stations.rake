@@ -16,8 +16,8 @@ task :get_canadian_stations => :environment do
     stations = nodes.map { |node| node.value.to_i }
 
     stations.each do |station_id|
-      if Station.find_by(ec_identifier: station_id).nil?
-        Station.create(ec_identifier: station_id)
+      if Station.find_by(national_station_id: station_id).nil?
+        Station.create(national_station_id: station_id)
       end
     end
     startRow += 100
