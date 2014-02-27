@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140227161153) do
+ActiveRecord::Schema.define(version: 20140227192648) do
 
   create_table "measurements", force: true do |t|
     t.date     "date"
@@ -37,15 +37,16 @@ ActiveRecord::Schema.define(version: 20140227161153) do
   create_table "stations", force: true do |t|
     t.string   "name"
     t.string   "province"
-    t.decimal  "latitude",           precision: 5, scale: 2
-    t.decimal  "longitude",          precision: 5, scale: 2
-    t.decimal  "elevation",          precision: 6, scale: 2
+    t.decimal  "latitude",            precision: 5, scale: 2
+    t.decimal  "longitude",           precision: 5, scale: 2
+    t.decimal  "elevation",           precision: 6, scale: 2
     t.integer  "climate_identifier"
     t.integer  "wmo_identifier"
-    t.integer  "ec_identifier"
+    t.integer  "national_station_id"
     t.string   "tc_identifier"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "country"
   end
 
 end
