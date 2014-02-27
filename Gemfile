@@ -43,3 +43,10 @@ end
 
 # Use debugger
 # gem 'debugger', group: [:development, :test]
+
+gem 'faraday'
+gem 'nokogiri'
+
+group :test, :development do
+  gem 'pry'
+end
