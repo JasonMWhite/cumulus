@@ -1,3 +1,6 @@
+require 'benchmark'
+logger = Logger.new(STDOUT)
+
 desc "Retrieve new weather data"
 task :update_weather => :environment do
   conn = Faraday.new(:url => 'http://climate.weather.gc.ca') do |faraday|
@@ -8,17 +11,26 @@ task :update_weather => :environment do
   conn.headers[:user_agent] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36'
 
   Station.all.each do |station|
+    start_time = Time.now
+
     last_measurement = station.measurements.order("date DESC, hour DESC").first
     last_date = last_measurement.nil? ? Date.new(2013,1,1) : last_measurement[:date]
+    logger.info "[Benchmarking] Station setup complete in #{Time.now - start_time} seconds"
 
     (Date.new(last_date.year, last_date.month, 1)..Date.today).select {|d| d.day == 1}.each do |date|
+      start_time = Time.now
       response = conn.get('/climateData/bulkdata_e.html', {format: 'xml', stationID: station.ec_identifier, 'Year' => date.year, 'Month' => date.month, 'Day' => date.day, timeframe: 1, submit: 'Download Data'})
+      logger.info "[Benchmarking] Data retrieved in #{Time.now - start_time} seconds"
+      start_time = Time.now
+
       doc = Nokogiri::XML.parse(response.body)
       if station.name.nil?
         station_node = doc.root.at_xpath('./stationinformation')
         update_station_attributes(station, station_node)
         station.save!
       end
+      logger.info "[Benchmarking] station saved in #{Time.now - start_time} seconds"
+      start_time = Time.now
 
       doc.root.xpath('./stationdata').each do |data_node|
         data_date = Date.new(data_node.attr('year').to_i, data_node.attr('month').to_i, data_node.attr('day').to_i)
@@ -27,6 +39,7 @@ task :update_weather => :environment do
         update_measurement_attributes(m, data_node)
         m.save!
       end
+      logger.info "[Benchmarking] measurement data saved in #{Time.now - start_time} seconds"
     end
   end
 end
