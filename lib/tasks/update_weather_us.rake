@@ -1,4 +1,5 @@
 require 'net/ftp'
+require 'csv'
 
 desc "Retrieve us weather meta-data"
 task :update_weather_us => :environment do
@@ -8,10 +9,27 @@ task :update_weather_us => :environment do
     puts ftp.gettextfile('stations.tsv')
   end
 
-  f = File.open("stations.tsv", "r")
-  f.each_line do |line|
-    rec = line.chop.split("\t")
+
+  # read the metadata file
+  rec=[]
+  CSV.foreach("us_stations.csv") do |row|
+    update_station_attributes(row)
   end
-  f.close
-  
+
 end
+
+
+def update_station_attributes(rec)
+  attributes = {
+    national_station_id: rec[1],
+    country: rec[2],
+    province: rec[3],
+    name: rec[4],
+    latitude: rec[5],
+    longitude: rec[6],
+    elevation: rec[7]
+  }
+  puts attributes
+  Station.create(attributes)
+    
+end 

@@ -11,10 +11,12 @@ task :update_weather => :environment do
   conn.headers[:user_agent] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36'
 
   Station.all.each do |station|
+    last_measurement = station.measurements.order("date_lst DESC, hour_lst DESC").first
+    last_date = last_measurement.nil? ? Date.new(2013,1,1) : last_measurement[:date_lst]
     start_time = Time.now
 
-    last_measurement = station.measurements.order("date DESC, hour DESC").first
-    last_date = last_measurement.nil? ? Date.new(2012,1,1) : last_measurement[:date]
+    last_measurement = station.measurements.order("date_lst DESC, hour_lst DESC").first
+    last_date = last_measurement.nil? ? Date.new(2013,1,1) : last_measurement[:date_lst]
     logger.info "[Benchmarking] Station setup complete in #{Time.now - start_time} seconds"
 
     (Date.new(last_date.year, last_date.month, 1)..Date.today).select {|d| d.day == 1}.each do |date|
@@ -34,8 +36,8 @@ task :update_weather => :environment do
 
       doc.root.xpath('./stationdata').each do |data_node|
         data_date = Date.new(data_node.attr('year').to_i, data_node.attr('month').to_i, data_node.attr('day').to_i)
-        hour = data_node.attr('hour').to_i
-        m = Measurement.find_by(station_id: station.id, date: data_date, hour: hour) || station.measurements.new(date: data_date, hour: hour)
+        hour = data_node.attr('hour_lst').to_i
+        m = Measurement.find_by(station_id: station.id, date_lst: data_date, hour_lst: hour) || station.measurements.new(date_lst: data_date, hour_lst: hour)
         update_measurement_attributes(m, data_node)
         m.save!
       end
