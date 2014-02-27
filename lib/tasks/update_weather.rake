@@ -14,7 +14,7 @@ task :update_weather => :environment do
     start_time = Time.now
 
     last_measurement = station.measurements.order("date DESC, hour DESC").first
-    last_date = last_measurement.nil? ? Date.new(2013,1,1) : last_measurement[:date]
+    last_date = last_measurement.nil? ? Date.new(2012,1,1) : last_measurement[:date]
     logger.info "[Benchmarking] Station setup complete in #{Time.now - start_time} seconds"
 
     (Date.new(last_date.year, last_date.month, 1)..Date.today).select {|d| d.day == 1}.each do |date|
