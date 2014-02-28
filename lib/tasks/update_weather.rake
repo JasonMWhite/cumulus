@@ -13,10 +13,7 @@ namespace :weather do
       conn.headers[:user_agent] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.63 Safari/537.36'
 
       Station.all.each do |station|
-        last_measurement = station.measurements.order("date_lst DESC, hour_lst DESC").first
-        last_date = last_measurement.nil? ? Date.new(2013,1,1) : last_measurement[:date_lst]
         start_time = Time.now
-
         last_measurement = station.measurements.order("date_lst DESC, hour_lst DESC").first
         last_date = last_measurement.nil? ? Date.new(2013,1,1) : last_measurement[:date_lst]
         logger.info "[Benchmarking] Station setup complete in #{Time.now - start_time} seconds"
@@ -30,7 +27,7 @@ namespace :weather do
           doc = Nokogiri::XML.parse(response.body)
           if station.name.nil?
             station_node = doc.root.at_xpath('./stationinformation')
-            update_station_attributes(station, station_node)
+            update_cdn_station_attributes(station, station_node)
             station.save!
           end
           logger.info "[Benchmarking] station saved in #{Time.now - start_time} seconds"
@@ -48,7 +45,7 @@ namespace :weather do
       end
     end
 
-    def update_station_attributes(station, node)
+    def update_cdn_station_attributes(station, node)
       node.children.each do |child|
         case child.name
         when 'name', 'province', 'tc_identifier'
@@ -61,7 +58,7 @@ namespace :weather do
       end
     end 
 
-    def update_measurement_attributes(measurement, node)
+    def update_cdn_measurement_attributes(measurement, node)
       node.children.each do |child|
         if child.inner_text.present?
           case child.name
