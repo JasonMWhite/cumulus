@@ -1,4 +1,6 @@
 require 'benchmark'
+require 'activerecord-import'
+
 logger = Logger.new(STDOUT)
 
 namespace :weather do
@@ -15,7 +17,7 @@ namespace :weather do
       Station.all.each do |station|
         start_time = Time.now
         last_measurement = station.measurements.order("date_lst DESC, hour_lst DESC").first
-        last_date = last_measurement.nil? ? Date.new(2013,1,1) : last_measurement[:date_lst]
+        last_date = last_measurement.nil? ? Date.new(2012,1,1) : last_measurement[:date_lst]
         logger.info "[Benchmarking] Station setup complete in #{Time.now - start_time} seconds"
 
         (Date.new(last_date.year, last_date.month, 1)..Date.today).select {|d| d.day == 1}.each do |date|
@@ -33,13 +35,22 @@ namespace :weather do
           logger.info "[Benchmarking] station saved in #{Time.now - start_time} seconds"
           start_time = Time.now
 
+          batch, batch_size = [], 1000
           doc.root.xpath('./stationdata').each do |data_node|
             data_date = Date.new(data_node.attr('year').to_i, data_node.attr('month').to_i, data_node.attr('day').to_i)
-            hour = data_node.attr('hour_lst').to_i
-            m = Measurement.find_by(station_id: station.id, date_lst: data_date, hour_lst: hour) || station.measurements.new(date_lst: data_date, hour_lst: hour)
-            update_measurement_attributes(m, data_node)
-            m.save!
+            hour = data_node.attr('hour').to_i
+            if Measurement.find_by(station_id: station.id, date_lst: data_date, hour_lst: hour).nil?
+              m = station.measurements.new(date_lst: data_date, hour_lst: hour)
+              update_cdn_measurement_attributes(m, data_node)
+              batch << m
+            end
+
+            if batch.size >= batch_size
+              Measurement.import batch
+              batch = []
+            end
           end
+          Measurement.import batch
           logger.info "[Benchmarking] measurement data saved in #{Time.now - start_time} seconds"
         end
       end

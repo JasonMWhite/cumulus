@@ -46,6 +46,7 @@ end
 
 gem 'faraday'
 gem 'nokogiri'
+gem 'activerecord-import'
 
 group :test, :development do
   gem 'pry'
