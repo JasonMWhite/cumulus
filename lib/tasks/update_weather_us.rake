@@ -59,14 +59,5 @@ namespace :weather do
       Station.create(attributes)
     end
 
-    desc "testing ftp"
-    task :test_ftp_download do
-      Net::FTP.open('ftp.ncdc.noaa.gov') do |ftp|
-        ftp.login
-        files = ftp.chdir('/pub/data/uscrn/products/')
-        stations = ftp.get_string_content('stations.tsv')
-        puts stations
-      end
-    end
   end
 end
